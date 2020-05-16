@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "MQTTSubscribeClient": {
+      "commandName": "Project",
+      "commandLineArgs": "Advantech/00D0C9F75FC1/data Advantech/00D0C9F95915/ctl/do2"
+    }
+  }
+}
