@@ -1,4 +1,6 @@
-﻿using RabbitMQ.Client;
+﻿using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System;
 using System.Collections.Generic;
@@ -11,8 +13,27 @@ namespace MQTTSubscribeClient
         static string Host = "207.180.236.206";
         static string Username = "mqtt_client";
         static string Password = "nopass";
+        static ILogger logger;
+        static void startup()
+        {
+            var builder = new HostBuilder()
+                .ConfigureLogging(logBuilder =>
+                {
+                    logBuilder.SetMinimumLevel(LogLevel.Trace);
+                    logBuilder.AddLog4Net("log4net.config");
+
+                }).UseConsoleLifetime();
+
+    
+            var host = builder.Build();
+
+            var loggerFactory = (ILoggerFactory)host.Services.GetService(typeof(ILoggerFactory));
+            logger = loggerFactory.CreateLogger("MqttSubcribeClientLogger");
+        }
         public static void Main(string[] args)
         {
+            startup();
+
             if(args.Length == 0)
             {
                 Console.WriteLine("Please provide topic to Subscribe");
@@ -43,6 +64,7 @@ namespace MQTTSubscribeClient
                     var body = ea.Body;
                     
                     var message = Encoding.UTF8.GetString(body.ToArray());
+                    logger.LogInformation(" [x] {0} - {1}", message, ea.RoutingKey);
                     Console.WriteLine(" [x] {0} - {1}", message, ea.RoutingKey);
                 };
                 channel.BasicConsume(queue: queueName,
